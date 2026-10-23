@@ -1,6 +1,10 @@
 
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'node:22-alpine'
+        }
+    }
 
     stages {
         stage('Build') {
@@ -20,9 +24,8 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo 'Deployment stage reached'
+                echo 'Deploy stage completed for demo application'
             }
         }
     }
 }
-
