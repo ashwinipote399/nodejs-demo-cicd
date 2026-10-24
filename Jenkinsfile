@@ -50,17 +50,19 @@ pipeline {
             }
         }
 
+        
         stage('Test') {
             steps {
                 sh '''
                     if npm run | grep -q "test"; then
-                        npm test -- --runInBand
+                        npm test
                     else
                         echo "No test script found. Skipping tests."
                     fi
                 '''
             }
         }
+
     }
 
     post {
