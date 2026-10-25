@@ -9,73 +9,42 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                echo 'Source code checkout completed by Jenkins.'
-            }
-        }
-
-        stage('Check Node.js and npm') {
-            steps {
-                sh '''
-                    echo "Checking Node.js..."
-                    node --version
-
-                    echo "Checking npm..."
-                    npm --version
-                '''
+                checkout scm
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                sh '''
-                    if [ -f package.json ]; then
-                        npm install
-                    else
-                        echo "ERROR: package.json not found!"
-                        exit 1
-                    fi
-                '''
+                sh 'npm install'
             }
         }
 
-        stage('Build') {
-            steps {
-                sh '''
-                    if npm run | grep -q "build"; then
-                        npm run build
-                    else
-                        echo "No build script found. Skipping build."
-                    fi
-                '''
-            }
-        }
-
-        
         stage('Test') {
             steps {
-                sh '''
-                    if npm run | grep -q "test"; then
-                        npm test
-                    else
-                        echo "No test script found. Skipping tests."
-                    fi
-                '''
+                sh 'npm test'
             }
         }
 
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t nodejs-demo-cicd .'
+            }
+        }
+
+        stage('Verify Docker Image') {
+            steps {
+                sh 'docker image inspect nodejs-demo-cicd'
+            }
+        }
     }
 
     post {
         success {
-            echo 'CI pipeline completed successfully!'
+            echo 'CI pipeline successful: tests passed and Docker image built.'
         }
-
         failure {
-            echo 'CI pipeline failed. Check Console Output.'
-        }
-
-        always {
-            echo 'Pipeline execution finished.'
+            echo 'Pipeline failed. Check the stage logs.'
         }
     }
 }
+
